@@ -1,0 +1,13 @@
+FROM openjdk:11.0.11-jdk as builder
+#FROM ssq/iac/java-ssq:corretto-11-latest
+WORKDIR source
+ARG JAR_FILE=/target/SpringBootLovesK8sApplication-*.jar
+COPY ${JAR_FILE} application.jar
+RUN jar -xf ./application.jar
+
+FROM openjdk:11.0.11-jre
+WORKDIR application
+COPY --from=builder source/BOOT-INF/lib lib
+COPY --from=builder source/META-INF app/META-INF
+COPY --from=builder source/BOOT-INF/classes app
+ENTRYPOINT ["java", "-cp", "app:lib/*","com.example.demo.SpringBootLovesK8sApplication"]
